@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>app: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/mmorejon/microservices-docker-go-mongodb/movies/cmd/app/handlers.go (0.0%)</option>
+				
+				<option value="file1">github.com/mmorejon/microservices-docker-go-mongodb/movies/cmd/app/helpers.go (0.0%)</option>
+				
+				<option value="file2">github.com/mmorejon/microservices-docker-go-mongodb/movies/cmd/app/main.go (0.0%)</option>
+				
+				<option value="file3">github.com/mmorejon/microservices-docker-go-mongodb/movies/cmd/app/routes.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "encoding/json"
+        "net/http"
+
+        "github.com/gorilla/mux"
+        "github.com/mmorejon/microservices-docker-go-mongodb/movies/pkg/models"
+)
+
+func (app *application) all(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        // Get all movie stored
+        movies, err := app.movies.All()
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, err)
+        }</span>
+
+        // Convert movie list into json encoding
+        <span class="cov0" title="0">b, err := json.Marshal(movies)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, err)
+        }</span>
+
+        <span class="cov0" title="0">app.infoLog.Println("Movies have been listed")
+
+        // Send response back
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        w.Write(b)</span>
+}
+
+func (app *application) findByID(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        // Get id from incoming url
+        vars := mux.Vars(r)
+        id := vars["id"]
+
+        // Find movie by id
+        m, err := app.movies.FindByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                if err.Error() == "ErrNoDocuments" </span><span class="cov0" title="0">{
+                        app.infoLog.Println("Movie not found")
+                        return
+                }</span>
+                // Any other error will send an internal server error
+                <span class="cov0" title="0">app.serverError(w, err)</span>
+        }
+
+        // Convert movie to json encoding
+        <span class="cov0" title="0">b, err := json.Marshal(m)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, err)
+        }</span>
+
+        <span class="cov0" title="0">app.infoLog.Println("Have been found a movie")
+
+        // Send response back
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        w.Write(b)</span>
+}
+
+func (app *application) insert(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        // Define movie model
+        var m models.Movie
+        // Get request information
+        err := json.NewDecoder(r.Body).Decode(&amp;m)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, err)
+        }</span>
+
+        // Insert new movie
+        <span class="cov0" title="0">insertResult, err := app.movies.Insert(m)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, err)
+        }</span>
+
+        <span class="cov0" title="0">app.infoLog.Printf("New movie have been created, id=%s", insertResult.InsertedID)</span>
+}
+
+func (app *application) delete(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        // Get id from incoming url
+        vars := mux.Vars(r)
+        id := vars["id"]
+
+        // Delete movie by id
+        deleteResult, err := app.movies.Delete(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, err)
+        }</span>
+
+        <span class="cov0" title="0">app.infoLog.Printf("Have been eliminated %d movie(s)", deleteResult.DeletedCount)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "fmt"
+        "net/http"
+        "runtime/debug"
+)
+
+func (app *application) serverError(w http.ResponseWriter, err error) <span class="cov0" title="0">{
+        trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
+        app.errorLog.Output(2, trace)
+
+        http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+}</span>
+
+func (app *application) clientError(w http.ResponseWriter, status int) <span class="cov0" title="0">{
+        http.Error(w, http.StatusText(status), status)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "context"
+        "flag"
+        "fmt"
+        "log"
+        "net/http"
+        "os"
+        "time"
+
+        "github.com/mmorejon/microservices-docker-go-mongodb/movies/pkg/models/mongodb"
+        "go.mongodb.org/mongo-driver/mongo"
+        "go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type application struct {
+        errorLog *log.Logger
+        infoLog  *log.Logger
+        movies   *mongodb.MovieModel
+}
+
+func main() <span class="cov0" title="0">{
+
+        // Define command-line flags
+        serverAddr := flag.String("serverAddr", "", "HTTP server network address")
+        serverPort := flag.Int("serverPort", 4000, "HTTP server network port")
+        mongoURI := flag.String("mongoURI", "mongodb://localhost:27017", "Database hostname url")
+        mongoDatabase := flag.String("mongoDatabase", "movies", "Database name")
+        enableCredentials := flag.Bool("enableCredentials", false, "Enable the use of credentials for mongo connection")
+        flag.Parse()
+
+        // Create logger for writing information and error messages.
+        infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+        errLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+        // Create mongo client configuration
+        co := options.Client().ApplyURI(*mongoURI)
+        if *enableCredentials </span><span class="cov0" title="0">{
+                co.Auth = &amp;options.Credential{
+                        Username: os.Getenv("MONGODB_USERNAME"),
+                        Password: os.Getenv("MONGODB_PASSWORD"),
+                }
+        }</span>
+
+        // Establish database connection
+        <span class="cov0" title="0">client, err := mongo.NewClient(co)
+        if err != nil </span><span class="cov0" title="0">{
+                errLog.Fatal(err)
+        }</span>
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+        defer cancel()
+
+        err = client.Connect(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                errLog.Fatal(err)
+        }</span>
+
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                if err = client.Disconnect(ctx); err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+        }()
+
+        <span class="cov0" title="0">infoLog.Printf("Database connection established")
+
+        // Initialize a new instance of application containing the dependencies.
+        app := &amp;application{
+                infoLog:  infoLog,
+                errorLog: errLog,
+                movies: &amp;mongodb.MovieModel{
+                        C: client.Database(*mongoDatabase).Collection("movies"),
+                },
+        }
+
+        // Initialize a new http.Server struct.
+        serverURI := fmt.Sprintf("%s:%d", *serverAddr, *serverPort)
+        srv := &amp;http.Server{
+                Addr:         serverURI,
+                ErrorLog:     errLog,
+                Handler:      app.routes(),
+                IdleTimeout:  time.Minute,
+                ReadTimeout:  5 * time.Second,
+                WriteTimeout: 10 * time.Second,
+        }
+
+        infoLog.Printf("Starting server on %s", serverURI)
+        err = srv.ListenAndServe()
+        errLog.Fatal(err)</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package main
+
+import (
+        "github.com/gorilla/mux"
+)
+
+func (app *application) routes() *mux.Router <span class="cov0" title="0">{
+        // Register handler functions.
+        r := mux.NewRouter()
+        r.HandleFunc("/api/movies/", app.all).Methods("GET")
+        r.HandleFunc("/api/movies/{id}", app.findByID).Methods("GET")
+        r.HandleFunc("/api/movies/", app.insert).Methods("POST")
+        r.HandleFunc("/api/movies/{id}", app.delete).Methods("DELETE")
+
+        return r
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
